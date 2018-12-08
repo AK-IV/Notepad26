@@ -137,6 +137,7 @@ public class NewEmptyNote extends AppCompatActivity {
         list.add("30");
         list.add("36");
         list.add("42");
+        list.add("72");
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, list);
@@ -209,23 +210,6 @@ public class NewEmptyNote extends AppCompatActivity {
 
         editText.setSelection(selectionStart, selectionEnd);
 
-        /*
-        String completetext=editText.getText().toString();
-        int selectionStart = editText.getSelectionStart();
-        int selectionEnd = editText.getSelectionEnd();
-        //int differenz = selectionEnd - selectionStart;
-
-        String selectedText = editText.getText().toString().substring(selectionStart, selectionEnd);
-        Log.d("selectedText", "selectedText " + selectedText + "|" + selectionStart + "|" + selectionEnd);
-
-        String part1 = editText.getText().toString().substring(0, selectionStart);
-
-        String part2 = editText.getText().toString().substring(selectionStart, selectionEnd);
-
-        String part3 = editText.getText().toString().substring(selectionEnd,completetext.length() );
-
-        editText.setText(Html.fromHtml(part1 + "<font color='"+txtColor+"'>" + part2+ "</font>" + part3));
-        */
     }
 
     private void toggleStyle(EditText editText, String style) {
@@ -269,8 +253,7 @@ public class NewEmptyNote extends AppCompatActivity {
 
                     // Else we set BOLD style on it
                     if (!exists) {
-                        str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), selectionStart, selectionEnd,
-                                Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                        str.setSpan(new StyleSpan(Typeface.BOLD), selectionStart, selectionEnd,0);
                     }
 
 
@@ -289,8 +272,7 @@ public class NewEmptyNote extends AppCompatActivity {
 
                     // Else we set ITALIC style on it
                     if (!exists) {
-                        str.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), selectionStart, selectionEnd,
-                                Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                        str.setSpan(new StyleSpan(Typeface.ITALIC), selectionStart, selectionEnd, 0);
                     }
 
                     break;
@@ -306,7 +288,7 @@ public class NewEmptyNote extends AppCompatActivity {
 
                     // Else we set UNDERLINE style on it
                     if (!exists) {
-                        str.setSpan(new UnderlineSpan(), selectionStart, selectionEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                        str.setSpan(new UnderlineSpan(), selectionStart, selectionEnd, 0);
                     }
 
                     break;
