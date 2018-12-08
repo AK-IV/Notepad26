@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Notepad26</string>
+    <string name="underlined_u"><u>U</u></string>
+
+    <string-array name="text_sizes">
+        <item>6</item>
+        <item>8</item>
+        <item>10</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>18</item>
+        <item>22</item>
+        <item>32</item>
+        <item>64</item>
+    </string-array>
 </resources>

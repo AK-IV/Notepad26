@@ -1,11 +1,14 @@
 package fr.utt.notepad26;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +26,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerView = findViewById(R.id.recyclerView);
+
+        Button newNoteBtn = findViewById(R.id.buttonAddNew);
+        newNoteBtn.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Intent myIntent = new Intent(MainActivity.this, NewEmptyNote.class);
+                MainActivity.this.startActivity(myIntent);
+            }
+        });
 
         noteAdapter = new NoteListAdapter(noteList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
