@@ -16,7 +16,7 @@
         <TableLayout
             android:id="@+id/tableLayout"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="161dp"
             android:background="@color/colorPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -24,6 +24,7 @@
             <TableRow
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center_horizontal|fill_horizontal|center"
                 android:paddingLeft="5dp">
 
                 <TextView
@@ -53,6 +54,24 @@
                     android:text="Taille"
                     android:textSize="18sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:text="Alignement"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/imageView5"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="false"
+                    android:paddingTop="0dp"
+                    app:srcCompat="@android:drawable/ic_menu_save" />
+
             </TableRow>
 
             <TableRow
@@ -84,6 +103,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
+                <ImageView
+                    android:id="@+id/alignLeft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/text_align_left" />
+
             </TableRow>
 
             <TableRow
@@ -108,6 +133,17 @@
                     android:textAllCaps="false"
                     android:textSize="20sp"
                     android:textStyle="italic" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:id="@+id/alignCenter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/text_align_center" />
+
             </TableRow>
 
             <TableRow
@@ -131,6 +167,16 @@
                     android:textAlignment="center"
                     android:textAllCaps="false"
                     android:textSize="20sp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:id="@+id/alignRight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/text_align_right" />
             </TableRow>
 
             <TableRow
@@ -145,6 +191,14 @@
                     android:layout_height="25dp"
                     android:background="@android:color/black" />
 
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
             </TableRow>
 
         </TableLayout>
@@ -155,7 +209,6 @@
             android:layout_height="match_parent"
             android:ems="10"
             android:gravity="start"
-            android:paddingStart="5dp"
             android:paddingTop="5dp"
             android:singleLine="false"
             android:textAlignment="textStart"

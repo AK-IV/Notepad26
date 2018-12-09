@@ -6,10 +6,13 @@ import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.method.ScrollingMovementMethod;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.AlignmentSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
@@ -18,6 +21,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Scroller;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -49,6 +53,10 @@ public class NewEmptyNote extends AppCompatActivity {
         View styleBoldBtn = findViewById(R.id.styleBold);
         View styleItalicBtn = findViewById(R.id.styleItalic);
         View styleUnderlineBtn = findViewById(R.id.styleUnderline);
+
+        View alignLeft = findViewById(R.id.alignLeft);
+        View alignCenter = findViewById(R.id.alignCenter);
+        View alignRight = findViewById(R.id.alignRight);
 
 
         redColorBtn.setOnClickListener(new View.OnClickListener() {
@@ -119,6 +127,71 @@ public class NewEmptyNote extends AppCompatActivity {
                 toggleStyle(mainText, "UNDERLINE");
             }
         });
+
+        /*
+
+            ==============================================================================
+
+         */
+
+        alignLeft.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Toast.makeText(getBaseContext(),"LEFT ALIGN", Toast.LENGTH_LONG).show();
+
+                alignText(mainText, "LEFT");
+            }
+        });
+
+        alignCenter.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Toast.makeText(getBaseContext(),"CENTER ALIGN", Toast.LENGTH_LONG).show();
+
+                alignText(mainText, "CENTER");
+            }
+        });
+
+        alignRight.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Toast.makeText(getBaseContext(),"RIGHT ALIGN", Toast.LENGTH_LONG).show();
+
+                alignText(mainText, "RIGHT");
+            }
+        });
+
+    }
+
+    private void alignText(EditText editText, String alignment){
+        int selectionStart = editText.getSelectionStart();
+        int selectionEnd = editText.getSelectionEnd();
+        Layout.Alignment txtAlign;
+
+        switch (alignment){
+            case "LEFT":
+                txtAlign = Layout.Alignment.ALIGN_NORMAL;
+                break;
+
+            case "CENTER":
+                txtAlign = Layout.Alignment.ALIGN_CENTER;
+                break;
+
+            case "RIGHT":
+                txtAlign = Layout.Alignment.ALIGN_OPPOSITE;
+                break;
+
+            default:
+                txtAlign = Layout.Alignment.ALIGN_NORMAL;
+                break;
+        }
+
+        SpannableStringBuilder stringBuilder = (SpannableStringBuilder) editText.getText();
+        stringBuilder.setSpan(new AlignmentSpan.Standard(txtAlign), selectionStart, selectionEnd, 0);
+
+        editText.setText(stringBuilder);
+
+        editText.setSelection(selectionStart, selectionEnd);
     }
 
     private void initSpinner(){
@@ -229,7 +302,7 @@ public class NewEmptyNote extends AppCompatActivity {
             selectionStart = temp;
         }
 
-        // The selectionEnd is only greater then the selectionStart position
+        // The selectionEnd is only greater than the selectionStart position
         // when the user selected a section of the text. Otherwise, the 2
         // variables
         // should be equal (the cursor position).
