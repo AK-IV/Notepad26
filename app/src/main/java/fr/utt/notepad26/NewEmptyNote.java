@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
@@ -18,6 +19,7 @@ import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -168,6 +170,15 @@ public class NewEmptyNote extends AppCompatActivity {
         int selectionEnd = editText.getSelectionEnd();
         Layout.Alignment txtAlign;
 
+        Spannable str = editText.getText();
+        AlignmentSpan.Standard[] spans;
+
+        spans = str.getSpans(selectionStart, selectionEnd, AlignmentSpan.Standard.class);
+
+        for (AlignmentSpan.Standard alignmentSpan : spans) {
+            str.removeSpan(alignmentSpan);
+        }
+
         switch (alignment){
             case "LEFT":
                 txtAlign = Layout.Alignment.ALIGN_NORMAL;
@@ -186,10 +197,10 @@ public class NewEmptyNote extends AppCompatActivity {
                 break;
         }
 
-        SpannableStringBuilder stringBuilder = (SpannableStringBuilder) editText.getText();
-        stringBuilder.setSpan(new AlignmentSpan.Standard(txtAlign), selectionStart, selectionEnd, 0);
+        //SpannableStringBuilder stringBuilder = (SpannableStringBuilder) editText.getText();
+        str.setSpan(new AlignmentSpan.Standard(txtAlign), selectionStart, selectionEnd, 0);
 
-        editText.setText(stringBuilder);
+        //editText.setText(stringBuilder);
 
         editText.setSelection(selectionStart, selectionEnd);
     }
@@ -230,11 +241,19 @@ public class NewEmptyNote extends AppCompatActivity {
 
                 int selectionStart = mainText.getSelectionStart();
                 int selectionEnd = mainText.getSelectionEnd();
+                Spannable str = mainText.getText();
+                AbsoluteSizeSpan[] spans;
 
-                SpannableStringBuilder stringBuilder = (SpannableStringBuilder) mainText.getText();
-                stringBuilder.setSpan(new AbsoluteSizeSpan(Integer.parseInt(selectedItem), true), selectionStart, selectionEnd, 0);
+                spans = str.getSpans(selectionStart, selectionEnd, AbsoluteSizeSpan.class);
 
-                mainText.setText(stringBuilder);
+                for (AbsoluteSizeSpan sizeSpan : spans) {
+                    str.removeSpan(sizeSpan);
+                }
+
+                //SpannableStringBuilder stringBuilder = (SpannableStringBuilder) mainText.getText();
+                str.setSpan(new AbsoluteSizeSpan(Integer.parseInt(selectedItem), true), selectionStart, selectionEnd, 0);
+
+                //mainText.setText(stringBuilder);
 
                 mainText.setSelection(selectionStart, selectionEnd);
 
@@ -253,6 +272,14 @@ public class NewEmptyNote extends AppCompatActivity {
         int selectionStart = editText.getSelectionStart();
         int selectionEnd = editText.getSelectionEnd();
         int color;
+        Spannable str = editText.getText();
+        ForegroundColorSpan[] spans;
+
+        spans = str.getSpans(selectionStart, selectionEnd, ForegroundColorSpan.class);
+
+        for (ForegroundColorSpan colorSpan : spans) {
+            str.removeSpan(colorSpan);
+        }
 
         switch (txtColor){
             case "RED":
@@ -276,10 +303,10 @@ public class NewEmptyNote extends AppCompatActivity {
                 break;
         }
 
-        SpannableStringBuilder stringBuilder = (SpannableStringBuilder) editText.getText();
-        stringBuilder.setSpan(new ForegroundColorSpan(color), selectionStart, selectionEnd, 0);
+        //SpannableStringBuilder stringBuilder = (SpannableStringBuilder) editText.getText();
+        str.setSpan(new ForegroundColorSpan(color), selectionStart, selectionEnd, 0);
 
-        editText.setText(stringBuilder);
+        //editText.setText(stringBuilder);
 
         editText.setSelection(selectionStart, selectionEnd);
 
