@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         newNoteBtn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity.this, NewEmptyNote.class);
+                Intent myIntent = new Intent(MainActivity.this, noteEditor.class);
                 MainActivity.this.startActivity(myIntent);
             }
         });

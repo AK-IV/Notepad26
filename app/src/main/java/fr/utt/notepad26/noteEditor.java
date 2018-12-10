@@ -1,36 +1,28 @@
 package fr.utt.notepad26;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.Html;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Layout;
+import android.text.Selection;
 import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.method.ScrollingMovementMethod;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Scroller;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewEmptyNote extends AppCompatActivity {
+public class noteEditor extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,15 +157,36 @@ public class NewEmptyNote extends AppCompatActivity {
 
     }
 
+    public int[] getCurrentCursorLineOffset(EditText editText)
+    {
+        int selectionStart = Selection.getSelectionStart(editText.getText());
+        int selectionEnd = Selection.getSelectionEnd(editText.getText());
+
+        Layout layout = editText.getLayout();
+
+        int startLine = layout.getLineForOffset(selectionStart);
+        int endLine = layout.getLineForOffset(selectionEnd);
+
+        if (selectionStart != -1) {
+
+            return new int[]{layout.getLineStart(startLine), layout.getLineEnd(endLine)};
+        }
+
+        return new int[]{-1, -1};
+    }
+
     private void alignText(EditText editText, String alignment){
         int selectionStart = editText.getSelectionStart();
         int selectionEnd = editText.getSelectionEnd();
         Layout.Alignment txtAlign;
 
+        //GET THE LINE OFFSETS
+        int[] curOffsets = getCurrentCursorLineOffset(editText);
+
         Spannable str = editText.getText();
         AlignmentSpan.Standard[] spans;
 
-        spans = str.getSpans(selectionStart, selectionEnd, AlignmentSpan.Standard.class);
+        spans = str.getSpans(curOffsets[0], curOffsets[1], AlignmentSpan.Standard.class);
 
         for (AlignmentSpan.Standard alignmentSpan : spans) {
             str.removeSpan(alignmentSpan);
@@ -198,11 +211,11 @@ public class NewEmptyNote extends AppCompatActivity {
         }
 
         //SpannableStringBuilder stringBuilder = (SpannableStringBuilder) editText.getText();
-        str.setSpan(new AlignmentSpan.Standard(txtAlign), selectionStart, selectionEnd, 0);
+        str.setSpan(new AlignmentSpan.Standard(txtAlign), curOffsets[0], curOffsets[1], 0);
 
         //editText.setText(stringBuilder);
 
-        editText.setSelection(selectionStart, selectionEnd);
+        //editText.setSelection(selectionStart, selectionEnd);
     }
 
     private void initSpinner(){
