@@ -1,9 +1,11 @@
 package fr.utt.notepad26;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
@@ -20,14 +22,17 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
-public class noteEditor extends AppCompatActivity {
+public class NoteEditor extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_empty_note);
+        setContentView(R.layout.activity_note_editor);
 
         final EditText mainText = findViewById(R.id.mainText);
 
@@ -51,6 +56,8 @@ public class noteEditor extends AppCompatActivity {
         View alignLeft = findViewById(R.id.alignLeft);
         View alignCenter = findViewById(R.id.alignCenter);
         View alignRight = findViewById(R.id.alignRight);
+
+        View saveBtn = findViewById(R.id.saveButton);
 
 
         redColorBtn.setOnClickListener(new View.OnClickListener() {
@@ -152,6 +159,23 @@ public class noteEditor extends AppCompatActivity {
                 Toast.makeText(getBaseContext(),"RIGHT ALIGN", Toast.LENGTH_LONG).show();
 
                 alignText(mainText, "RIGHT");
+            }
+        });
+
+        //======================================================================================
+
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Toast.makeText(getBaseContext(),"SAVING", Toast.LENGTH_LONG).show();
+
+                saveNewNote(mainText);
+
+                /*
+                Intent myIntent = new Intent(NoteEditor.this, MainActivity.class);
+
+                NoteEditor.this.startActivity(myIntent);
+                */
             }
         });
 
@@ -409,5 +433,26 @@ public class noteEditor extends AppCompatActivity {
 
             editText.setSelection(selectionStart, selectionEnd);
         }
+    }
+
+    public void saveNewNote(EditText mainText){
+
+        String textNoteName = "NOTE 1";
+        Spannable spanText = mainText.getText();
+
+        String htmlText = Html.toHtml(spanText);
+
+        Calendar cal = Calendar.getInstance();
+        TimeZone timeZone =  cal.getTimeZone();
+        Date cals = Calendar.getInstance(TimeZone.getDefault()).getTime();
+        long milliseconds = cals.getTime();
+        milliseconds = milliseconds + timeZone.getOffset(milliseconds);
+        long unixTimeStamp = milliseconds / 1000L;
+
+        Intent myIntent = new Intent(this, NewNoteSaveDialog.class);
+        myIntent.putExtra("content", htmlText);
+        myIntent.putExtra("date", unixTimeStamp);
+        startActivity(myIntent);
+
     }
 }

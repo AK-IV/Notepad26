@@ -10,7 +10,7 @@ import android.widget.TextView;
 import java.util.List;
 
 public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteListViewHolder>{
-    private List<NoteListEntry> noteList;
+    private List<Note> noteList;
 
     public class NoteListViewHolder extends RecyclerView.ViewHolder {
         public TextView noteTitle, noteDate;
@@ -23,7 +23,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteLi
     }
 
 
-    public NoteListAdapter(List<NoteListEntry> noteList) {
+    public NoteListAdapter(List<Note> noteList) {
         this.noteList = noteList;
     }
 
@@ -37,9 +37,9 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteLi
 
     @Override
     public void onBindViewHolder(NoteListViewHolder holder, int position) {
-        NoteListEntry note = noteList.get(position);
-        holder.noteTitle.setText(note.getName());
-        holder.noteDate.setText(note.getNoteShortDate());
+        Note note = noteList.get(position);
+        holder.noteTitle.setText(note.getNoteName());
+        holder.noteDate.setText(note.unixTimestampToDateString());
     }
 
     @Override

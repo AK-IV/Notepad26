@@ -11,32 +11,41 @@ import android.view.View;
 import android.widget.Button;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
-    private List<NoteListEntry> noteList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private NoteListAdapter noteAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
 
         Button newNoteBtn = findViewById(R.id.buttonAddNew);
         newNoteBtn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity.this, noteEditor.class);
+                Intent myIntent = new Intent(MainActivity.this, NoteEditor.class);
                 MainActivity.this.startActivity(myIntent);
             }
         });
 
-        noteAdapter = new NoteListAdapter(noteList);
+
+        SQLModule sqlModule = new SQLModule(this, SQLModule.DATABASE_NAME, null, 1);
+
+        ArrayList<Note> noteList = sqlModule.getAllNotes();
+
+        /*
+        System.out.println("////////////////////////LIST OF SAVED NOTES :////////////////////////");
+
+        for (Note row : noteList){
+            System.out.println(row.getDB_ID() + " " + row.getNoteName() + " " + row.getNoteDate());
+        }
+
+        System.out.println("/////////////////////////////////////////////////////////////////////");
+        */
+
+        NoteListAdapter noteAdapter = new NoteListAdapter(noteList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -46,25 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(noteAdapter);
 
-        prepareTestData();
-    }
-
-    private void prepareTestData() {
-        NoteListEntry note = new NoteListEntry("Note1", new Date());
-        noteList.add(note);
-
-        note = new NoteListEntry("Note2", new Date());
-        noteList.add(note);
-
-        note = new NoteListEntry("Note3", new Date());
-        noteList.add(note);
-
-        note = new NoteListEntry("Note4", new Date());
-        noteList.add(note);
-
-        note = new NoteListEntry("Note5", new Date());
-        noteList.add(note);
-
         noteAdapter.notifyDataSetChanged();
+
+        //prepareTestData();
     }
 }
