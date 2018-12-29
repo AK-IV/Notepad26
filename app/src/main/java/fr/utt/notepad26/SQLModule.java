@@ -76,6 +76,17 @@ public class SQLModule extends SQLiteOpenHelper {
 
     }
 
+    public void updateNote(Note note) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+        cv.put(NOTE_DATE, note.getNoteDate());
+        cv.put(NOTE_CONTENTS, note.getNoteContent());
+
+        db.update(NOTES_TABLE, cv, NOTE_ID + "=" + note.getDB_ID(), null);
+    }
+
+
     public Note getNote(int note_id){
         SQLiteDatabase db = getWritableDatabase();
 
@@ -103,13 +114,13 @@ public class SQLModule extends SQLiteOpenHelper {
 
     }
 
-    public void delNote(Note note){
+    public void delNote(int noteID){
 
         SQLiteDatabase db = getWritableDatabase();
 
         String deleteQuery = "DELETE " + NOTES_TABLE + " WHERE " + NOTE_ID +"=?";
 
-        db.delete(NOTES_TABLE, NOTE_ID+"=?", new String[]{String.valueOf(note.getDB_ID())});
+        db.delete(NOTES_TABLE, NOTE_ID+"=?", new String[]{String.valueOf(noteID)});
 
     }
 

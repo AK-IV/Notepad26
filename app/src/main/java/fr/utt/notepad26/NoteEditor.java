@@ -9,6 +9,7 @@ import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.ForegroundColorSpan;
@@ -29,20 +30,29 @@ import java.util.TimeZone;
 
 public class NoteEditor extends AppCompatActivity {
 
+    private int curNoteID;
+    private SQLModule sqlModule;
+    private EditText mainText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_editor);
 
-        final EditText mainText = findViewById(R.id.mainText);
+        mainText = findViewById(R.id.mainText);
 
-        initButtons(mainText);
+        sqlModule = new SQLModule(this, SQLModule.DATABASE_NAME, null, 1);
 
+        Intent myIntent = getIntent(); // gets the previously created intent
+        curNoteID = myIntent.getIntExtra("note_id", 0);
+
+        initButtons();
         initSpinner();
+        loadNoteData(curNoteID);
 
     }
 
-    private void initButtons(final EditText mainText){
+    private void initButtons(){
 
         View redColorBtn = findViewById(R.id.colorRed);
         View greenColorBtn = findViewById(R.id.colorGreen);
@@ -65,7 +75,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(), "RED", Toast.LENGTH_LONG).show();
 
-                setTextColor(mainText, "RED");
+                setTextColor("RED");
             }
         });
 
@@ -74,7 +84,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(),"GREEN", Toast.LENGTH_LONG).show();
 
-                setTextColor(mainText, "GREEN");
+                setTextColor("GREEN");
             }
         });
 
@@ -83,7 +93,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(),"BLUE", Toast.LENGTH_LONG).show();
 
-                setTextColor(mainText, "BLUE");
+                setTextColor("BLUE");
             }
         });
 
@@ -92,7 +102,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(),"BLACK", Toast.LENGTH_LONG).show();
 
-                setTextColor(mainText, "black");
+                setTextColor("black");
             }
         });
 
@@ -140,7 +150,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(),"LEFT ALIGN", Toast.LENGTH_LONG).show();
 
-                alignText(mainText, "LEFT");
+                alignText("LEFT");
             }
         });
 
@@ -149,7 +159,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(),"CENTER ALIGN", Toast.LENGTH_LONG).show();
 
-                alignText(mainText, "CENTER");
+                alignText("CENTER");
             }
         });
 
@@ -158,7 +168,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(),"RIGHT ALIGN", Toast.LENGTH_LONG).show();
 
-                alignText(mainText, "RIGHT");
+                alignText("RIGHT");
             }
         });
 
@@ -169,7 +179,7 @@ public class NoteEditor extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getBaseContext(),"SAVING", Toast.LENGTH_LONG).show();
 
-                saveNewNote(mainText);
+                saveNote(mainText);
 
                 /*
                 Intent myIntent = new Intent(NoteEditor.this, MainActivity.class);
@@ -181,12 +191,12 @@ public class NoteEditor extends AppCompatActivity {
 
     }
 
-    public int[] getCurrentCursorLineOffset(EditText editText)
+    public int[] getCurrentCursorLineOffset()
     {
-        int selectionStart = Selection.getSelectionStart(editText.getText());
-        int selectionEnd = Selection.getSelectionEnd(editText.getText());
+        int selectionStart = Selection.getSelectionStart(mainText.getText());
+        int selectionEnd = Selection.getSelectionEnd(mainText.getText());
 
-        Layout layout = editText.getLayout();
+        Layout layout = mainText.getLayout();
 
         int startLine = layout.getLineForOffset(selectionStart);
         int endLine = layout.getLineForOffset(selectionEnd);
@@ -199,15 +209,15 @@ public class NoteEditor extends AppCompatActivity {
         return new int[]{-1, -1};
     }
 
-    private void alignText(EditText editText, String alignment){
-        int selectionStart = editText.getSelectionStart();
-        int selectionEnd = editText.getSelectionEnd();
+    private void alignText(String alignment){
+        int selectionStart = mainText.getSelectionStart();
+        int selectionEnd = mainText.getSelectionEnd();
         Layout.Alignment txtAlign;
 
         //GET THE LINE OFFSETS
-        int[] curOffsets = getCurrentCursorLineOffset(editText);
+        int[] curOffsets = getCurrentCursorLineOffset();
 
-        Spannable str = editText.getText();
+        Spannable str = mainText.getText();
         AlignmentSpan.Standard[] spans;
 
         spans = str.getSpans(curOffsets[0], curOffsets[1], AlignmentSpan.Standard.class);
@@ -304,12 +314,12 @@ public class NoteEditor extends AppCompatActivity {
         });
     }
 
-    private void setTextColor(EditText editText, String txtColor) {
+    private void setTextColor(String txtColor) {
 
-        int selectionStart = editText.getSelectionStart();
-        int selectionEnd = editText.getSelectionEnd();
+        int selectionStart = mainText.getSelectionStart();
+        int selectionEnd = mainText.getSelectionEnd();
         int color;
-        Spannable str = editText.getText();
+        Spannable str = mainText.getText();
         ForegroundColorSpan[] spans;
 
         spans = str.getSpans(selectionStart, selectionEnd, ForegroundColorSpan.class);
@@ -345,7 +355,7 @@ public class NoteEditor extends AppCompatActivity {
 
         //editText.setText(stringBuilder);
 
-        editText.setSelection(selectionStart, selectionEnd);
+        mainText.setSelection(selectionStart, selectionEnd);
 
     }
 
@@ -435,11 +445,21 @@ public class NoteEditor extends AppCompatActivity {
         }
     }
 
-    public void saveNewNote(EditText mainText){
+    public void loadNoteData(int noteID){
 
-        String textNoteName = "NOTE 1";
+        if (noteID == 0) { return; }
+
+        Note note = sqlModule.getNote(noteID);
+
+        Spanned noteContent = Html.fromHtml(note.getNoteContent());
+
+        mainText.setText(noteContent);
+    }
+
+    public void saveNote(EditText mainText){
+
+        //String textNoteName = "NOTE 1";
         Spannable spanText = mainText.getText();
-
         String htmlText = Html.toHtml(spanText);
 
         Calendar cal = Calendar.getInstance();
@@ -447,12 +467,24 @@ public class NoteEditor extends AppCompatActivity {
         Date cals = Calendar.getInstance(TimeZone.getDefault()).getTime();
         long milliseconds = cals.getTime();
         milliseconds = milliseconds + timeZone.getOffset(milliseconds);
+
         long unixTimeStamp = milliseconds / 1000L;
 
-        Intent myIntent = new Intent(this, NewNoteSaveDialog.class);
-        myIntent.putExtra("content", htmlText);
-        myIntent.putExtra("date", unixTimeStamp);
-        startActivity(myIntent);
+        if (curNoteID == 0) {
+
+            Intent myIntent = new Intent(this, NewNoteSaveDialog.class);
+            myIntent.putExtra("content", htmlText);
+            myIntent.putExtra("date", unixTimeStamp);
+            startActivity(myIntent);
+        }
+        else{
+            Note note = sqlModule.getNote(curNoteID);
+
+            note.setNoteContent(htmlText);
+            note.setNoteDate(unixTimeStamp);
+
+            sqlModule.updateNote(note);
+        }
 
     }
 }
