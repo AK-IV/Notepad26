@@ -1,5 +1,7 @@
 package fr.utt.notepad26;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,15 +11,21 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Note> noteList;
+
+    final SQLModule sqlModule = new SQLModule(this, SQLModule.DATABASE_NAME, null, 1);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +43,6 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(myIntent);
             }
         });
-
-
-        final SQLModule sqlModule = new SQLModule(this, SQLModule.DATABASE_NAME, null, 1);
 
         noteList = sqlModule.getAllNotes();
 
@@ -68,9 +73,19 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view, int position) {
                 Note note = noteList.get(position);
 
-                Intent myIntent = new Intent(MainActivity.this, NoteEditor.class);
-                myIntent.putExtra("note_id", note.getDB_ID());
-                startActivity(myIntent);
+                System.out.println("NOTE ID : " + note.getDB_ID());
+
+                String pw_hash = sqlModule.getNotePassword(note.getDB_ID());
+
+                System.out.println("PASSWORD : " + pw_hash);
+
+                if (!pw_hash.equals("")){
+                    showDialog(MainActivity.this, note.getDB_ID());
+                } else {
+                    Intent myIntent = new Intent(MainActivity.this, NoteEditor.class);
+                    myIntent.putExtra("note_id", note.getDB_ID());
+                    startActivity(myIntent);
+                }
 
             }
 
@@ -111,5 +126,64 @@ public class MainActivity extends AppCompatActivity {
 
         noteAdapter.notifyDataSetChanged();
 
+    }
+
+    public void showDialog(Activity activity, final int noteID){
+
+        final Dialog dialog = new Dialog(activity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.password_dialog);
+
+        final EditText userPWInput = dialog.findViewById(R.id.noteListPassword);
+
+        Button btnok = dialog.findViewById(R.id.pwDialogOK);
+        btnok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String input_pw = userPWInput.getText().toString();
+
+                String pw_hash_DB = sqlModule.getNotePassword(noteID);
+
+                if (pw_hash_DB.equals(hash(input_pw))){
+                    Intent myIntent = new Intent(MainActivity.this, NoteEditor.class);
+                    myIntent.putExtra("note_id", noteID);
+                    startActivity(myIntent);
+                }
+
+                /*tv.setText(et.getText().toString());
+                tv2.setText(et2.getText().toString());
+                tv3.setText(et3.getText().toString());*/
+                dialog.dismiss();
+            }
+        });
+
+        Button btncn = (Button) dialog.findViewById(R.id.pwDialogCancel);
+        btncn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    public String hash(String password) {
+        try {
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            String salt = "salty_salt";
+            String passWithSalt = password + salt;
+            byte[] passBytes = passWithSalt.getBytes();
+            byte[] passHash = sha256.digest(passBytes);
+            StringBuilder sb = new StringBuilder();
+            for(int i=0; i< passHash.length ;i++) {
+                sb.append(Integer.toString((passHash[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            String generatedPassword = sb.toString();
+            return generatedPassword;
+        } catch (NoSuchAlgorithmException e) { e.printStackTrace(); }
+        return null;
     }
 }

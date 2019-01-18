@@ -1,5 +1,7 @@
 package fr.utt.notepad26;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -18,6 +20,7 @@ import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -33,6 +36,7 @@ public class NoteEditor extends AppCompatActivity {
     private int curNoteID;
     private SQLModule sqlModule;
     private EditText mainText;
+    private boolean spinnerInitialized = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,9 +181,11 @@ public class NoteEditor extends AppCompatActivity {
         saveBtn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                Toast.makeText(getBaseContext(),"SAVING", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getBaseContext(),"SAVING", Toast.LENGTH_LONG).show();
 
                 saveNote(mainText);
+
+                showSaveNotification(NoteEditor.this);
 
                 /*
                 Intent myIntent = new Intent(NoteEditor.this, MainActivity.class);
@@ -247,9 +253,6 @@ public class NoteEditor extends AppCompatActivity {
         //SpannableStringBuilder stringBuilder = (SpannableStringBuilder) editText.getText();
         str.setSpan(new AlignmentSpan.Standard(txtAlign), curOffsets[0], curOffsets[1], 0);
 
-        //editText.setText(stringBuilder);
-
-        //editText.setSelection(selectionStart, selectionEnd);
     }
 
     private void initSpinner(){
@@ -280,29 +283,35 @@ public class NoteEditor extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                String selectedItem = parent.getItemAtPosition(position).toString();
-
-                //Toast.makeText(getBaseContext(), "SELECTED: " + selectedItem, Toast.LENGTH_SHORT).show();
-
-                EditText mainText = findViewById(R.id.mainText);
-
-                int selectionStart = mainText.getSelectionStart();
-                int selectionEnd = mainText.getSelectionEnd();
-                Spannable str = mainText.getText();
-                AbsoluteSizeSpan[] spans;
-
-                spans = str.getSpans(selectionStart, selectionEnd, AbsoluteSizeSpan.class);
-
-                for (AbsoluteSizeSpan sizeSpan : spans) {
-                    str.removeSpan(sizeSpan);
+                if (!spinnerInitialized){
+                    spinnerInitialized = true;
                 }
+                else {
 
-                //SpannableStringBuilder stringBuilder = (SpannableStringBuilder) mainText.getText();
-                str.setSpan(new AbsoluteSizeSpan(Integer.parseInt(selectedItem), true), selectionStart, selectionEnd, 0);
+                    String selectedItem = parent.getItemAtPosition(position).toString();
 
-                //mainText.setText(stringBuilder);
+                    //Toast.makeText(getBaseContext(), "SELECTED: " + selectedItem, Toast.LENGTH_SHORT).show();
 
-                mainText.setSelection(selectionStart, selectionEnd);
+                    EditText mainText = findViewById(R.id.mainText);
+
+                    int selectionStart = mainText.getSelectionStart();
+                    int selectionEnd = mainText.getSelectionEnd();
+                    Spannable str = mainText.getText();
+                    AbsoluteSizeSpan[] spans;
+
+                    spans = str.getSpans(selectionStart, selectionEnd, AbsoluteSizeSpan.class);
+
+                    for (AbsoluteSizeSpan sizeSpan : spans) {
+                        str.removeSpan(sizeSpan);
+                    }
+
+                    //SpannableStringBuilder stringBuilder = (SpannableStringBuilder) mainText.getText();
+                    str.setSpan(new AbsoluteSizeSpan(Integer.parseInt(selectedItem), true), selectionStart, selectionEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                    //mainText.setText(stringBuilder);
+
+                    mainText.setSelection(selectionStart, selectionEnd);
+                }
 
             }
 
@@ -451,7 +460,8 @@ public class NoteEditor extends AppCompatActivity {
 
         Note note = sqlModule.getNote(noteID);
 
-        Spanned noteContent = Html.fromHtml(note.getNoteContent());
+        Spanned noteContent = Html.fromHtml(note.getNoteContent(), null, new CustomHTMLTagHandler());
+        //Spanned noteContent = Html.fromHtml(note.getNoteContent());
 
         mainText.setText(noteContent);
     }
@@ -461,6 +471,9 @@ public class NoteEditor extends AppCompatActivity {
         //String textNoteName = "NOTE 1";
         Spannable spanText = mainText.getText();
         String htmlText = Html.toHtml(spanText);
+
+        htmlText = htmlText.replaceAll("align=\"","style=\"text-align: ");
+        htmlText = htmlText.replaceAll("span","spanned");
 
         Calendar cal = Calendar.getInstance();
         TimeZone timeZone =  cal.getTimeZone();
@@ -486,5 +499,24 @@ public class NoteEditor extends AppCompatActivity {
             sqlModule.updateNote(note);
         }
 
+    }
+
+    public void showSaveNotification(Activity activity){
+
+        final Dialog dialog = new Dialog(activity);
+        dialog.setTitle("Confirmation");
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.save_confirmation);
+
+
+        Button btnok = dialog.findViewById(R.id.saveOKBtn);
+        btnok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 }
