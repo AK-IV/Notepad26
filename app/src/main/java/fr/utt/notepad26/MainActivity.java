@@ -3,6 +3,7 @@ package fr.utt.notepad26;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -13,8 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.security.MessageDigest;
@@ -80,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("PASSWORD : " + pw_hash);
 
                 if (!pw_hash.equals("")){
-                    showDialog(MainActivity.this, note.getDB_ID());
+                    showPasswordDialog(MainActivity.this, note.getDB_ID());
                 } else {
                     Intent myIntent = new Intent(MainActivity.this, NoteEditor.class);
                     myIntent.putExtra("note_id", note.getDB_ID());
@@ -126,9 +129,16 @@ public class MainActivity extends AppCompatActivity {
 
         noteAdapter.notifyDataSetChanged();
 
+        SharedPreferences mPrefs = getSharedPreferences("rgpd_settings", 0);
+        String mString = mPrefs.getString("rgpd_show", "yes");
+
+        if (mString.equals("yes")){
+            showRGPDDialog(MainActivity.this);
+        }
+
     }
 
-    public void showDialog(Activity activity, final int noteID){
+    public void showPasswordDialog(Activity activity, final int noteID){
 
         final Dialog dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -168,6 +178,41 @@ public class MainActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    public void showRGPDDialog(Activity activity){
+
+        final Dialog dialog = new Dialog(activity);
+        dialog.setCancelable(false);
+        dialog.setTitle("RGPD");
+        dialog.setContentView(R.layout.rgpd_notice_dialog);
+
+        TextView RGPD_Text = dialog.findViewById(R.id.rgpd_text);
+
+        RGPD_Text.setText("Cette application ne stoque aucune donnée à caractère personnel sans le" +
+                " consentement de l'utilisateur." + "\n" +
+                "\nCette application ne communique aucune donnée avec le web.");
+
+        Button btnok = dialog.findViewById(R.id.RGPD_ok_btn);
+        btnok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                SharedPreferences mPrefs = getSharedPreferences("rgpd_settings", 0);
+                SharedPreferences.Editor mEditor = mPrefs.edit();
+
+                CheckBox rgpd_checkbox = dialog.findViewById(R.id.rgpd_checkbox);
+
+                if (rgpd_checkbox.isChecked()){
+                    mEditor.putString("rgpd_show", "no").apply();
+                }
+
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+
     }
 
     public String hash(String password) {
