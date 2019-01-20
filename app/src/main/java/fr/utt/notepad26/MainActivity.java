@@ -80,13 +80,12 @@ public class MainActivity extends AppCompatActivity {
 
                 String pw_hash = sqlModule.getNotePassword(note.getDB_ID());
 
-                System.out.println("PASSWORD : " + pw_hash);
-
                 if (!pw_hash.equals("")){
                     showPasswordDialog(MainActivity.this, note.getDB_ID());
                 } else {
                     Intent myIntent = new Intent(MainActivity.this, NoteEditor.class);
                     myIntent.putExtra("note_id", note.getDB_ID());
+                    myIntent.putExtra("password", "");
                     startActivity(myIntent);
                 }
 
@@ -159,12 +158,10 @@ public class MainActivity extends AppCompatActivity {
                 if (pw_hash_DB.equals(hash(input_pw))){
                     Intent myIntent = new Intent(MainActivity.this, NoteEditor.class);
                     myIntent.putExtra("note_id", noteID);
+                    myIntent.putExtra("password", input_pw);
                     startActivity(myIntent);
                 }
 
-                /*tv.setText(et.getText().toString());
-                tv2.setText(et2.getText().toString());
-                tv3.setText(et3.getText().toString());*/
                 dialog.dismiss();
             }
         });
@@ -223,11 +220,10 @@ public class MainActivity extends AppCompatActivity {
             byte[] passBytes = passWithSalt.getBytes();
             byte[] passHash = sha256.digest(passBytes);
             StringBuilder sb = new StringBuilder();
-            for(int i=0; i< passHash.length ;i++) {
-                sb.append(Integer.toString((passHash[i] & 0xff) + 0x100, 16).substring(1));
+            for (byte aPassHash : passHash) {
+                sb.append(Integer.toString((aPassHash & 0xff) + 0x100, 16).substring(1));
             }
-            String generatedPassword = sb.toString();
-            return generatedPassword;
+            return sb.toString();
         } catch (NoSuchAlgorithmException e) { e.printStackTrace(); }
         return null;
     }

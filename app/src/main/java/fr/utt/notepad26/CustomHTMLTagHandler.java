@@ -6,7 +6,6 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StrikethroughSpan;
 import android.util.Log;
 
 import org.xml.sax.XMLReader;
@@ -14,13 +13,12 @@ import org.xml.sax.XMLReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
 public class CustomHTMLTagHandler implements Html.TagHandler {
 
-    final HashMap<String, String> attributes = new HashMap<>();
+    private final HashMap<String, String> attributes = new HashMap<>();
     private ArrayList<String> styleTypes = new ArrayList<>();
     private String color = "000000";
     private int size = 12;
@@ -122,7 +120,7 @@ public class CustomHTMLTagHandler implements Html.TagHandler {
             lengthField.setAccessible(true);
             int len = (Integer) lengthField.get(atts);
 
-            /**
+            /*
              * MSH: Look for supported attributes and add to hash map.
              * This is as tight as things can get :)
              * The data index is "just" where the keys and values are stored.
@@ -131,22 +129,6 @@ public class CustomHTMLTagHandler implements Html.TagHandler {
                 attributes.put(data[i * 5 + 1], data[i * 5 + 4]);
         } catch (Exception e) {
             Log.d(TAG, "Exception: " + e);
-        }
-    }
-
-    private void processSize(boolean opening, Editable output, int size) {
-        int len = output.length();
-        if (opening) {
-            output.setSpan(new AbsoluteSizeSpan(size), len, len, Spannable.SPAN_MARK_MARK);
-        } else {
-            Object obj = getLast(output, AbsoluteSizeSpan.class);
-            int where = output.getSpanStart(obj);
-
-            output.removeSpan(obj);
-
-            if (where != len) {
-                output.setSpan(new AbsoluteSizeSpan(size, true), where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
         }
     }
 

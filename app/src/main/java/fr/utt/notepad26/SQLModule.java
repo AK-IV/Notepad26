@@ -1,6 +1,5 @@
 package fr.utt.notepad26;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,7 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class SQLModule extends SQLiteOpenHelper {
 
@@ -99,7 +97,7 @@ public class SQLModule extends SQLiteOpenHelper {
 
         db.update(NOTES_TABLE, cv, NOTE_ID + "=" + note.getDB_ID(), null);
 
-        System.out.println("\n\n\nCONTENT: " + note.getNoteContent() + "\n\n\n");
+        System.out.println("CONTENT: " + note.getNoteContent());
     }
 
 

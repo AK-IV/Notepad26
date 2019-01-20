@@ -25,6 +25,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.scottyab.aescrypt.AESCrypt;
+
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,10 +52,11 @@ public class NoteEditor extends AppCompatActivity {
 
         Intent myIntent = getIntent(); // gets the previously created intent
         curNoteID = myIntent.getIntExtra("note_id", 0);
+        String pw = myIntent.getStringExtra("password");
 
         initButtons();
         initSpinner();
-        loadNoteData(curNoteID);
+        loadNoteData(curNoteID, pw);
 
     }
 
@@ -184,8 +188,6 @@ public class NoteEditor extends AppCompatActivity {
                 //Toast.makeText(getBaseContext(),"SAVING", Toast.LENGTH_LONG).show();
 
                 saveNote(mainText);
-
-                showSaveNotification(NoteEditor.this);
 
                 /*
                 Intent myIntent = new Intent(NoteEditor.this, MainActivity.class);
@@ -454,14 +456,31 @@ public class NoteEditor extends AppCompatActivity {
         }
     }
 
-    public void loadNoteData(int noteID){
+    public void loadNoteData(int noteID, String pw){
 
         if (noteID == 0) { return; }
 
+        Spanned noteContent;
+
         Note note = sqlModule.getNote(noteID);
 
-        Spanned noteContent = Html.fromHtml(note.getNoteContent(), null, new CustomHTMLTagHandler());
-        //Spanned noteContent = Html.fromHtml(note.getNoteContent());
+        if (!pw.equals("")){
+            String decrypted_content;
+
+            try {
+                decrypted_content = AESCrypt.decrypt(pw, note.getNoteContent());
+            } catch (Exception e) {
+                System.out.println("ERROR DECRYPTING CONTENT!");
+                e.printStackTrace();
+                return;
+            }
+
+            noteContent = Html.fromHtml(decrypted_content, null, new CustomHTMLTagHandler());
+        }
+        else{
+            noteContent = Html.fromHtml(note.getNoteContent(), null, new CustomHTMLTagHandler());
+            //Spanned noteContent = Html.fromHtml(note.getNoteContent());
+        }
 
         mainText.setText(noteContent);
     }
@@ -493,10 +512,31 @@ public class NoteEditor extends AppCompatActivity {
         else{
             Note note = sqlModule.getNote(curNoteID);
 
-            note.setNoteContent(htmlText);
+            Intent myIntent = getIntent();
+            String pw = myIntent.getStringExtra("password");
+
+            if (!pw.equals("")) {
+
+                String content_enc;
+
+                try {
+                    content_enc = AESCrypt.encrypt(pw, htmlText);
+                }catch (GeneralSecurityException e){
+                    System.out.print("ERROR ENCRYPTING CONTENT");
+                    return;
+                }
+
+                note.setNoteContent(content_enc);
+
+            }else{
+                note.setNoteContent(htmlText);
+            }
+
             note.setNoteDate(unixTimeStamp);
 
             sqlModule.updateNote(note);
+
+            showSaveNotification(NoteEditor.this);
         }
 
     }

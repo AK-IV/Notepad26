@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.scottyab.aescrypt.AESCrypt;
+
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -44,20 +47,35 @@ public class NewNoteSaveDialog extends AppCompatActivity {
 
         sqlModule = new SQLModule(this, SQLModule.DATABASE_NAME, null, 1);
 
-        Note newNote = new Note(0, name.getText().toString(), content, date);
-
-        long note_id = sqlModule.addNote(newNote);
-
-        System.out.println("ADDED NOTE WITH ID :" + note_id);
-
+        long note_id;
         String pw_str = password.getText().toString();
+        String pw_hash = hash(pw_str);
 
         if(!pw_str.replace(" ", "").equals("")) {
-            String pw_hash = hash(pw_str);
+
+            String content_enc;
+
+            try {
+                content_enc = AESCrypt.encrypt(pw_str, content);
+            }catch (GeneralSecurityException e){
+                System.out.print("ERROR ENCRYPTING CONTENT");
+                return;
+            }
+
+            Note newNote = new Note(0, name.getText().toString(), content_enc, date);
+            note_id = sqlModule.addNote(newNote);
 
             System.out.println("PW HASH :" + pw_hash);
             sqlModule.addNotePassword(note_id, pw_hash);
         }
+        else{
+            Note newNote = new Note(0, name.getText().toString(), content, date);
+
+            note_id = sqlModule.addNote(newNote);
+        }
+
+        System.out.println("ADDED NOTE WITH ID :" + note_id);
+
 
 
     }
@@ -72,8 +90,7 @@ public class NewNoteSaveDialog extends AppCompatActivity {
             for(int i=0; i< passHash.length ;i++) {
                 sb.append(Integer.toString((passHash[i] & 0xff) + 0x100, 16).substring(1));
             }
-            String generatedPassword = sb.toString();
-            return generatedPassword;
+            return sb.toString();
         } catch (NoSuchAlgorithmException e) { e.printStackTrace(); }
         return null;
     }
