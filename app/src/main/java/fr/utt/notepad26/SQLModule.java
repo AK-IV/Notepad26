@@ -93,6 +93,7 @@ public class SQLModule extends SQLiteOpenHelper {
 
         ContentValues cv = new ContentValues();
         cv.put(NOTE_DATE, note.getNoteDate());
+        cv.put(NOTE_NAME, note.getNoteName());
         cv.put(NOTE_CONTENTS, note.getNoteContent());
 
         db.update(NOTES_TABLE, cv, NOTE_ID + "=" + note.getDB_ID(), null);

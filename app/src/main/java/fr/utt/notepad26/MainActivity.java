@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +18,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        //Séparateur lignes
+        //Séparateur de lignes
         recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
 
         //Set Adapter
@@ -105,15 +104,63 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.menu_note_delete:
-                                Toast.makeText(getApplicationContext(), "DELETE THIS SHIT", Toast.LENGTH_SHORT).show();
 
-                                sqlModule.delNote(note.getDB_ID());
+                                final String pw_hash = sqlModule.getNotePassword(note.getDB_ID());
 
-                                noteList.remove(position);
+                                if (!pw_hash.equals("")) {
 
-                                noteAdapter.notifyItemRemoved(position);
+                                    final Dialog dialog = new Dialog(MainActivity.this);
+                                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                    dialog.setCancelable(false);
+                                    dialog.setContentView(R.layout.password_dialog);
+
+                                    final EditText userPWInput = dialog.findViewById(R.id.noteListPassword);
+
+                                    Button btnok = dialog.findViewById(R.id.pwDialogOK);
+                                    btnok.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+
+                                            String input_pw = userPWInput.getText().toString();
+
+
+                                            if (pw_hash.equals(hash(input_pw))){
+                                                sqlModule.delNote(note.getDB_ID());
+
+                                                noteList.remove(position);
+
+                                                noteAdapter.notifyItemRemoved(position);
+                                            }
+
+                                            dialog.dismiss();
+                                        }
+                                    });
+
+                                    Button btncn = dialog.findViewById(R.id.pwDialogCancel);
+                                    btncn.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+
+                                    dialog.show();
+
+                                } else {
+                                    sqlModule.delNote(note.getDB_ID());
+
+                                    noteList.remove(position);
+
+                                    noteAdapter.notifyItemRemoved(position);
+                                }
 
                                 break;
+                            case R.id.menu_note_rename:
+
+                                showRenameDialog(MainActivity.this, note.getDB_ID(), noteAdapter);
+
+                                break;
+
                             default:
                                 //default
                                 break;
@@ -135,6 +182,48 @@ public class MainActivity extends AppCompatActivity {
             showRGPDDialog(MainActivity.this);
         }
 
+    }
+
+    public void showRenameDialog(Activity activity, final int noteID, final NoteListAdapter noteAdapter){
+        final Dialog dialog = new Dialog(activity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.rename_dialog);
+
+        final EditText userNameInput = dialog.findViewById(R.id.rename_input);
+
+        Button btnok = dialog.findViewById(R.id.renameDialogOK);
+        btnok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String nameString = userNameInput.getText().toString();
+
+                if (!nameString.replace(" ", "").equals("")){
+                    Note note = sqlModule.getNote(noteID);
+
+                    note.setNoteName(nameString);
+
+                    sqlModule.updateNote(note);
+
+                    noteList.clear();
+                    noteList.addAll(sqlModule.getAllNotes());
+                    noteAdapter.notifyDataSetChanged();
+                }
+
+                dialog.dismiss();
+            }
+        });
+
+        Button btncn = dialog.findViewById(R.id.renameDialogCancel);
+        btncn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 
     public void showPasswordDialog(Activity activity, final int noteID){
@@ -166,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btncn = (Button) dialog.findViewById(R.id.pwDialogCancel);
+        Button btncn = dialog.findViewById(R.id.pwDialogCancel);
         btncn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -186,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView RGPD_Text = dialog.findViewById(R.id.rgpd_text);
 
-        RGPD_Text.setText("Cette application ne stoque aucune donnée à caractère personnel sans le" +
+        RGPD_Text.setText("Cette application ne stocke aucune donnée à caractère personnel sans le" +
                 " consentement de l'utilisateur." + "\n" +
                 "\nCette application ne communique aucune donnée avec le web.");
 

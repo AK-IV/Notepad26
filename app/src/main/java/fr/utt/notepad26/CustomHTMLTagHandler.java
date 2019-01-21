@@ -25,35 +25,32 @@ public class CustomHTMLTagHandler implements Html.TagHandler {
 
     @Override
     public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader) {
-        /*if (tag.equalsIgnoreCase("strike") || tag.equals("s")) {
-            processStrike(opening, output);
-        }*/
 
         if(tag.equalsIgnoreCase("spanned")){
 
-            System.out.println("FOUND SPAN");
+            //System.out.println("FOUND SPAN");
 
             if (opening) {
 
-                System.out.println("OPENING");
+               //System.out.println("OPENING");
 
                 processAttributes(xmlReader);
 
-                System.out.println("PROCESSED ATTRIBUTES");
+                //System.out.println("PROCESSED ATTRIBUTES");
 
                 if (attributes.containsKey("style")) {
 
-                    System.out.println("FOUND STYLE ATTRIBUTE");
+                    //System.out.println("FOUND STYLE ATTRIBUTE");
 
                     String style = attributes.get("style");
 
                     if (style.contains("font-size:")) {
                         styleTypes.add("size");
 
-                        System.out.println("FOUND FONT-SIZE ATTRIBUTE");
+                        //System.out.println("FOUND FONT-SIZE ATTRIBUTE");
                         size = Integer.parseInt(style.replace("font-size:", "").replace("px", ""));
 
-                        System.out.println("SIZE = " + size);
+                        //System.out.println("SIZE = " + size);
 
                         output.setSpan(new AbsoluteSizeSpan(size, true), output.length(), output.length(), Spannable.SPAN_MARK_MARK);
                     }
@@ -62,13 +59,13 @@ public class CustomHTMLTagHandler implements Html.TagHandler {
 
                         color = style.replace("color:", "").replace(";", "");
 
-                        System.out.println("COLOR = " + color);
+                        //System.out.println("COLOR = " + color);
 
                         output.setSpan(new ForegroundColorSpan(Color.parseColor(color)), output.length(), output.length(), Spannable.SPAN_MARK_MARK);
                     }
                 }
             } else {
-                System.out.println("CLOSING");
+                //System.out.println("CLOSING");
 
                 Object obj;
 
@@ -105,7 +102,7 @@ public class CustomHTMLTagHandler implements Html.TagHandler {
     }
 
     private void processAttributes(final XMLReader xmlReader) {
-        System.out.println("PROCESSING ATTRIBUTES");
+        //System.out.println("PROCESSING ATTRIBUTES");
         try {
             Field elementField = xmlReader.getClass().getDeclaredField("theNewElement");
             elementField.setAccessible(true);
